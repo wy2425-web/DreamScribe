@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DreamScribe — Prototype Documentation</title>
+  <style>
+    /* ── Variables & Reset ─────────────────────────────────────────── */
+    :root {
+      --bg:        #0e0c1e;
+      --bg2:       #16132e;
+      --bg3:       #1f1a3d;
+      --purple:    #7c5cbf;
+      --purple-lt: #a88fe0;
+      --accent:    #c4a8ff;
+      --text:      #e8e4f5;
+      --text-dim:  #9b95b8;
+      --border:    rgba(124,92,191,0.25);
+      --card:      rgba(31,26,61,0.8);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── Typography ────────────────────────────────────────────────── */
+    h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; }
+    h2 { font-size: 2rem; margin-bottom: 0.4rem; }
+    h3 { font-size: 1.2rem; color: var(--accent); margin-bottom: 0.5rem; }
+    p  { color: var(--text-dim); margin-bottom: 0.8rem; }
+    a  { color: var(--purple-lt); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ────────────────────────────────────────────────────── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+    section { padding: 5rem 0; border-bottom: 1px solid var(--border); }
+    section:last-child { border-bottom: none; }
+
+    /* ── Nav ───────────────────────────────────────────────────────── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(14,12,30,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .inner {
+      max-width: 1100px; margin: 0 auto; padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-size: 1.2rem; font-weight: 800; color: var(--text); }
+    .nav-logo span { color: var(--purple-lt); }
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links a { font-size: 0.9rem; color: var(--text-dim); transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ──────────────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      background: radial-gradient(ellipse at 50% 60%, rgba(124,92,191,0.18) 0%, transparent 70%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='1' fill='rgba(124,92,191,0.15)'/%3E%3C/svg%3E") repeat;
+      opacity: 0.5;
+    }
+    .hero-content { position: relative; }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(124,92,191,0.2); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.3rem 1rem;
+      font-size: 0.8rem; color: var(--accent); margin-bottom: 1.5rem;
+    }
+    .hero h1 { font-size: clamp(3rem, 8vw, 6rem); color: var(--text); margin-bottom: 1rem; }
+    .hero .tagline { font-size: 1.3rem; color: var(--text-dim); margin-bottom: 2.5rem; }
+    .hero-meta { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .hero-meta span { font-size: 0.85rem; color: var(--text-dim); }
+    .hero-meta strong { color: var(--accent); }
+
+    /* ── Section labels ────────────────────────────────────────────── */
+    .section-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--purple-lt);
+      margin-bottom: 0.5rem; display: block;
+    }
+    .section-line {
+      width: 48px; height: 3px;
+      background: linear-gradient(90deg, var(--purple), transparent);
+      border-radius: 2px; margin: 0.8rem 0 2.5rem;
+    }
+
+    /* ── Cards ─────────────────────────────────────────────────────── */
+    .card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.8rem;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    @media(max-width: 700px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Numbered list items ───────────────────────────────────────── */
+    .numbered-item {
+      display: flex; gap: 1.2rem; align-items: flex-start;
+      padding: 1.2rem 0; border-bottom: 1px solid var(--border);
+    }
+    .numbered-item:last-child { border-bottom: none; }
+    .num {
+      min-width: 2.2rem; height: 2.2rem; border-radius: 50%;
+      background: rgba(124,92,191,0.25); border: 1px solid var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: var(--accent);
+    }
+    .num-content h3 { margin-bottom: 0.2rem; font-size: 1rem; color: var(--text); }
+    .num-content p  { margin: 0; font-size: 0.9rem; }
+
+    /* ── Wireframes ─────────────────────────────────────────────────  */
+    .wireframe-phone {
+      background: #111; border: 2px solid #444; border-radius: 28px;
+      padding: 1.5rem; max-width: 220px; margin: 0 auto;
+    }
+    .wf-header {
+      background: #1e1a3a; border-radius: 8px 8px 0 0;
+      padding: 0.5rem 0.8rem; font-size: 0.75rem; color: var(--accent);
+      font-weight: 700; margin-bottom: 0.8rem;
+    }
+    .wf-mic {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: var(--purple); margin: 0.8rem auto;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: white; font-weight: 600;
+    }
+    .wf-label { text-align: center; font-size: 0.7rem; color: var(--text-dim); margin: 0.3rem 0; }
+    .wf-input {
+      background: #222; border: 1px solid #444; border-radius: 6px;
+      padding: 0.5rem; font-size: 0.65rem; color: #888; margin: 0.4rem 0;
+    }
+    .wf-btn {
+      background: var(--purple); color: white; text-align: center;
+      border-radius: 6px; padding: 0.5rem; font-size: 0.7rem;
+      font-weight: 600; margin-top: 0.6rem; cursor: pointer;
+    }
+    .wf-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin: 0.6rem 0;
+    }
+    .wf-panel {
+      background: rgba(124,92,191,0.2); border: 1px solid var(--border);
+      border-radius: 6px; height: 55px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; color: var(--text-dim);
+    }
+    .wf-actions {
+      display: flex; gap: 0.4rem; margin-top: 0.5rem;
+    }
+    .wf-action-share {
+      flex: 1; background: var(--purple); color: white; text-align: center;
+      border-radius: 6px; padding: 0.35rem; font-size: 0.6rem; font-weight: 600;
+    }
+    .wf-action-save {
+      flex: 1; border: 1px solid var(--border); color: var(--text-dim); text-align: center;
+      border-radius: 6px; padding: 0.35rem; font-size: 0.6rem;
+    }
+    .wireframe-arrow {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: var(--purple-lt); padding: 0 1rem;
+    }
+    .wireframe-row {
+      display: flex; align-items: center; justify-content: center; gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* ── Code block ─────────────────────────────────────────────────── */
+    pre {
+      background: #0a0818; border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.5rem;
+      font-size: 0.82rem; line-height: 1.6;
+      overflow-x: auto; color: #c9b8f5;
+    }
+    .code-header {
+      background: #16132e; border: 1px solid var(--border);
+      border-bottom: none; border-radius: 10px 10px 0 0;
+      padding: 0.6rem 1rem; font-size: 0.8rem; color: var(--text-dim);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .code-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-red { background: #ff5f57; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #28c840; }
+    .code-header .filename { margin-left: 0.5rem; }
+    pre.attached { border-radius: 0 0 10px 10px; }
+    .kw  { color: #c4a8ff; }
+    .fn  { color: #80cfff; }
+    .str { color: #a8d8a8; }
+    .cm  { color: #5a5480; font-style: italic; }
+    .num-lit { color: #f0c080; }
+
+    /* ── Model table ────────────────────────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th {
+      background: var(--bg3); color: var(--text); padding: 0.9rem 1rem;
+      text-align: left; font-size: 0.8rem; letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    td { padding: 0.9rem 1rem; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { color: var(--accent); font-weight: 600; }
+    td:nth-child(2) { color: var(--text-dim); font-style: italic; }
+    tr:hover td { background: rgba(124,92,191,0.06); }
+
+    /* ── Troubleshooting log ────────────────────────────────────────── */
+    .log-entry {
+      border-left: 3px solid var(--purple);
+      padding: 1rem 1.5rem; margin-bottom: 1.2rem;
+      background: rgba(124,92,191,0.06); border-radius: 0 8px 8px 0;
+    }
+    .log-entry .log-issue { font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .log-entry .log-fix { font-size: 0.9rem; color: var(--text-dim); }
+    .log-entry .log-status {
+      display: inline-block; font-size: 0.7rem; font-weight: 700;
+      padding: 0.15rem 0.6rem; border-radius: 999px; margin-bottom: 0.5rem;
+    }
+    .status-resolved { background: rgba(40,200,100,0.15); color: #6eeaa0; }
+    .status-open     { background: rgba(255,160,60,0.15);  color: #ffb060; }
+
+    /* ── Support questions ──────────────────────────────────────────── */
+    .q-item {
+      padding: 1.2rem 1.5rem; border: 1px solid var(--border);
+      border-radius: 10px; margin-bottom: 1rem;
+      background: rgba(124,92,191,0.05);
+    }
+    .q-num { font-size: 0.75rem; color: var(--purple-lt); font-weight: 700; margin-bottom: 0.3rem; }
+    .q-text { color: var(--text); font-weight: 600; margin-bottom: 0.3rem; }
+    .q-detail { font-size: 0.88rem; color: var(--text-dim); }
+
+    /* ── Prototype demo output ──────────────────────────────────────── */
+    .comic-panel-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      margin: 2rem 0;
+    }
+    @media(max-width: 700px) { .comic-panel-grid { grid-template-columns: 1fr; } }
+    .comic-panel {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+    }
+    .comic-panel-img {
+      height: 120px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; color: var(--text-dim);
+      background: linear-gradient(135deg, rgba(124,92,191,0.15), rgba(30,20,60,0.5));
+    }
+    .comic-panel-body { padding: 0.8rem; }
+    .comic-panel-num { font-size: 0.7rem; color: var(--purple-lt); font-weight: 700; }
+    .comic-panel-dialogue { font-size: 0.82rem; color: var(--text); font-style: italic; margin-top: 0.2rem; }
+
+    /* ── Pipeline diagram ────────────────────────────────────────────── */
+    .pipeline {
+      display: flex; align-items: center; gap: 0; overflow-x: auto;
+      padding: 1rem 0;
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 130px; text-align: center;
+    }
+    .pipe-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(124,92,191,0.25); border: 2px solid var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; margin-bottom: 0.5rem;
+    }
+    .pipe-label { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+    .pipe-sub   { font-size: 0.65rem; color: var(--text-dim); margin-top: 0.1rem; }
+    .pipe-arrow { font-size: 1.3rem; color: var(--purple); padding: 0 0.3rem; flex-shrink: 0; margin-top: -18px; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 3rem 0;
+      font-size: 0.85rem; color: var(--text-dim);
+      border-top: 1px solid var(--border);
+    }
+    footer strong { color: var(--accent); }
+
+    /* ── Tag chips ───────────────────────────────────────────────────── */
+    .tag {
+      display: inline-block; background: rgba(124,92,191,0.18);
+      border: 1px solid rgba(124,92,191,0.35); color: var(--accent);
+      border-radius: 999px; padding: 0.2rem 0.7rem; font-size: 0.75rem;
+      font-weight: 600; margin: 0.2rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────────────────── -->
+<nav>
+  <div class="inner">
+    <span class="nav-logo">Dream<span>Scribe</span></span>
+    <ul class="nav-links">
+      <li><a href="#ux">UX Design</a></li>
+      <li><a href="#dev">Dev Plan</a></li>
+      <li><a href="#prototype">Prototype</a></li>
+      <li><a href="#code">Source Code</a></li>
+      <li><a href="#log">Troubleshooting</a></li>
+      <li><a href="#support">Support</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content container">
+    <div class="hero-badge">🌙 Project Prototype Documentation</div>
+    <h1>DreamScribe</h1>
+    <p class="tagline">Your dreams, illustrated.</p>
+    <div class="hero-meta">
+      <span><strong>William Yang</strong></span>
+      <span><strong>April 8, 2026</strong></span>
+      <span>AI &amp; Design Studio</span>
+    </div>
+    <div style="margin-top:2rem;">
+      <span class="tag">LLM (GPT-4)</span>
+      <span class="tag">DALL-E 3</span>
+      <span class="tag">Whisper ASR</span>
+      <span class="tag">Python</span>
+      <span class="tag">Claude AI</span>
+      <span class="tag">Stable Diffusion</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── 1. UX DESIGN ─────────────────────────────────────────────────────── -->
+<section id="ux">
+  <div class="container">
+    <span class="section-label">01 — User Experience Design</span>
+    <h2>Wireframes &amp; Design Evolution</h2>
+    <div class="section-line"></div>
+
+    <p>The app is designed to be <strong style="color:var(--text)">frictionless from the first second you wake up</strong> — a large mic button to speak your dream, two short follow-up prompts, and then the AI handles the rest.</p>
+
+    <!-- wireframes -->
+    <div class="wireframe-row" style="margin: 3rem 0;">
+      <!-- Input Screen -->
+      <div>
+        <div class="wireframe-phone">
+          <div class="wf-header">DreamScribe</div>
+          <div class="wf-mic">mic</div>
+          <div class="wf-label">Tap to describe your dream</div>
+          <div class="wf-input">Weirdest part?</div>
+          <div class="wf-input">How did it feel?</div>
+          <div class="wf-btn">Generate Comic →</div>
+        </div>
+        <p style="text-align:center;font-size:0.8rem;margin-top:0.8rem;">Input Screen</p>
+      </div>
+
+      <div class="wireframe-arrow">→</div>
+
+      <!-- Output Screen -->
+      <div>
+        <div class="wireframe-phone">
+          <div class="wf-header">Your Dream Comic</div>
+          <div class="wf-grid">
+            <div class="wf-panel">Panel 1</div>
+            <div class="wf-panel">Panel 2</div>
+            <div class="wf-panel">Panel 3</div>
+            <div class="wf-panel">Panel 4</div>
+            <div class="wf-panel">Panel 5</div>
+            <div class="wf-panel">Panel 6</div>
+          </div>
+          <div class="wf-actions">
+            <div class="wf-action-share">Share</div>
+            <div class="wf-action-save">Save to Dream Book</div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:0.8rem;margin-top:0.8rem;">Comic Output Screen</p>
+      </div>
+    </div>
+
+    <!-- Design evolution -->
+    <h3>Design Evolution</h3>
+    <div class="grid-2">
+      <div class="card">
+        <h3>v1 — Text-First</h3>
+        <p>Initial concept was a text input box (like a journal app). User testing revealed people don't want to type right after waking — it's too slow and the dream fades.</p>
+      </div>
+      <div class="card">
+        <h3>v2 — Voice-First (Current)</h3>
+        <p>Moved to a large mic button as the primary input, with text as a fallback. Two short follow-up questions reduce blank-page anxiety and help the AI extract mood and key moments.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <h3>Key UX Principles</h3>
+      <div class="numbered-item">
+        <div class="num">1</div>
+        <div class="num-content">
+          <h3>Speed over perfection</h3>
+          <p>The user should be able to describe their dream in under 60 seconds. The AI fills in the rest.</p>
+        </div>
+      </div>
+      <div class="numbered-item">
+        <div class="num">2</div>
+        <div class="num-content">
+          <h3>Low cognitive load on waking</h3>
+          <p>Only 2 follow-up questions. No dropdowns, no settings, no menus before the comic is generated.</p>
+        </div>
+      </div>
+      <div class="numbered-item">
+        <div class="num">3</div>
+        <div class="num-content">
+          <h3>Delight through the unexpected</h3>
+          <p>The AI auto-selects an art style matching the dream's mood — users are surprised to see their dream rendered in a style that "just fits."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 2. DEVELOPMENT PLAN ────────────────────────────────────────────────── -->
+<section id="dev">
+  <div class="container">
+    <span class="section-label">02 — Development Plan</span>
+    <h2>Models, Methods &amp; Pipeline</h2>
+    <div class="section-line"></div>
+
+    <!-- Pipeline -->
+    <h3>The Pipeline</h3>
+    <div class="pipeline" style="margin: 2rem 0 3rem;">
+      <div class="pipe-step">
+        <div class="pipe-icon">🎙️</div>
+        <div class="pipe-label">Voice Input</div>
+        <div class="pipe-sub">Whisper ASR</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🔍</div>
+        <div class="pipe-label">Dream Parser</div>
+        <div class="pipe-sub">GPT-4</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-icon">📖</div>
+        <div class="pipe-label">Story Engine</div>
+        <div class="pipe-sub">GPT-4 + Prompts</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-icon">🎨</div>
+        <div class="pipe-label">Image Gen</div>
+        <div class="pipe-sub">DALL-E 3</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step">
+        <div class="pipe-icon">📚</div>
+        <div class="pipe-label">Dream Book</div>
+        <div class="pipe-sub">Local Storage</div>
+      </div>
+    </div>
+
+    <!-- Model table -->
+    <h3>AI / ML Models</h3>
+    <div class="card" style="padding:0;overflow:hidden;margin: 1.5rem 0 2.5rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Model Type</th>
+            <th>Example</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Large Language Model</td>
+            <td>GPT-4 / Claude</td>
+            <td>Parses dream text, fills narrative gaps, writes dialogue in the user's voice, structures the 6-beat story arc.</td>
+          </tr>
+          <tr>
+            <td>Text-to-Image</td>
+            <td>DALL-E 3 / Stable Diffusion</td>
+            <td>Generates each comic panel from scene descriptions with style conditioning for visual consistency.</td>
+          </tr>
+          <tr>
+            <td>Sentiment / Mood Classifier</td>
+            <td>Fine-tuned BERT</td>
+            <td>Classifies dream tone (playful, eerie, surreal, heartwarming) to drive art style and color palette.</td>
+          </tr>
+          <tr>
+            <td>Speech-to-Text (ASR)</td>
+            <td>OpenAI Whisper</td>
+            <td>Transcribes voice descriptions into clean text — tuned to handle groggy, half-awake speech patterns.</td>
+          </tr>
+          <tr>
+            <td>Style Consistency</td>
+            <td>LoRA / IP-Adapter</td>
+            <td>Keeps character faces, settings, and visual style coherent across all 6 separately-generated panels.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Prompting strategy -->
+    <h3>Prompting Strategy</h3>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Dream Parsing Prompt</h3>
+        <p>Instructs GPT-4 to extract <em>characters, setting, key events, mood, and art style</em> as structured JSON. Uses few-shot examples of surreal dream narratives to ground the model.</p>
+      </div>
+      <div class="card">
+        <h3>Story Engine Prompt</h3>
+        <p>Uses a 6-beat story arc template (Setup → Rising Action → Complication → Climax → Resolution → Coda). The user's own phrasing is injected into the system prompt so dialogue matches their voice.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+      <h3>Vibe Coding &amp; Tools Used</h3>
+      <p>Built and ideated with: <span class="tag">Claude AI</span> <span class="tag">ChatGPT-4</span> <span class="tag">Cursor IDE</span> <span class="tag">Python 3.12</span> <span class="tag">Figma (wireframes)</span> <span class="tag">GitHub Copilot</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- ── 3. PROTOTYPE ───────────────────────────────────────────────────────── -->
+<section id="prototype">
+  <div class="container">
+    <span class="section-label">03 — Prototype Working</span>
+    <h2>Sample Output &amp; Demo</h2>
+    <div class="section-line"></div>
+
+    <p>The current prototype takes a dream description and generates a structured 6-panel comic script with scene descriptions, dialogue, and DALL-E image prompts. Below is an example run through the pipeline.</p>
+
+    <div style="margin: 2rem 0;">
+      <div class="card" style="margin-bottom:1rem;">
+        <h3>Example Dream Input</h3>
+        <p style="color:var(--text);font-style:italic;">"I was flying over a city made of clouds, and my old teacher was there but she had no face. There were stairs everywhere but they all led to the same door."</p>
+        <p><strong style="color:var(--text)">Weirdest part:</strong> <span>My teacher had no face — just a blur where her features should be.</span></p>
+        <p><strong style="color:var(--text)">How it felt:</strong> <span>Confused and slightly anxious, but also amazed by the flying.</span></p>
+        <p style="margin:0;"><span class="tag">Mood detected: surreal</span> <span class="tag">Style: soft watercolor with dreamlike blending</span></p>
+      </div>
+    </div>
+
+    <h3>Generated Comic — "Dream of the Cloud City"</h3>
+    <div class="comic-panel-grid">
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(100,80,180,0.3),rgba(30,20,60,0.8));">🌤️ floating upward</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 1 — Setup</div>
+          <div class="comic-panel-dialogue">"Wait… I'm flying? This is actually happening."</div>
+        </div>
+      </div>
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(80,100,200,0.3),rgba(20,20,60,0.8));">🌆 cloud cityscape</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 2 — Rising Action</div>
+          <div class="comic-panel-dialogue">"Everyone's going about their day like this is normal. Am I the only one up here?"</div>
+        </div>
+      </div>
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(140,60,160,0.3),rgba(30,10,50,0.8));">👤 faceless figure</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 3 — Complication</div>
+          <div class="comic-panel-dialogue">"Ms. Johnson? Is that… you? Why can't I see your face?"</div>
+        </div>
+      </div>
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(80,60,180,0.3),rgba(20,15,60,0.8));">🪜 infinite stairs</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 4 — Deepening</div>
+          <div class="comic-panel-dialogue">"She's pointing at something. All these staircases… they're everywhere."</div>
+        </div>
+      </div>
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(60,80,200,0.3),rgba(15,20,60,0.8));">🚪 the same door</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 5 — Climax</div>
+          <div class="comic-panel-dialogue">"Every door is the same door. That can't be right. I've climbed seventeen of these."</div>
+        </div>
+      </div>
+      <div class="comic-panel">
+        <div class="comic-panel-img" style="background:linear-gradient(135deg,rgba(200,180,80,0.2),rgba(30,20,50,0.8));">☀️ waking up</div>
+        <div class="comic-panel-body">
+          <div class="comic-panel-num">PANEL 6 — Resolution</div>
+          <div class="comic-panel-dialogue">"No, no, no — I was so close. What was behind there?!"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>What's Working</h3>
+      <div class="numbered-item">
+        <div class="num">✓</div>
+        <div class="num-content"><p>Basic LLM prompt chain: dream text → 6-panel story summary (GPT-4 API mock)</p></div>
+      </div>
+      <div class="numbered-item">
+        <div class="num">✓</div>
+        <div class="num-content"><p>DALL-E 3 panel generation: scene description → comic image prompt (ready for real API)</p></div>
+      </div>
+      <div class="numbered-item">
+        <div class="num">✓</div>
+        <div class="num-content"><p>Whisper transcription pipeline: voice recording → clean dream text (mocked)</p></div>
+      </div>
+      <div class="numbered-item">
+        <div class="num">✓</div>
+        <div class="num-content"><p>Sentiment classifier: classifies dream tone into 4 mood categories</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 4. SOURCE CODE ─────────────────────────────────────────────────────── -->
+<section id="code">
+  <div class="container">
+    <span class="section-label">04 — Source Code</span>
+    <h2>Core Prototype Code</h2>
+    <div class="section-line"></div>
+
+    <p>The full prototype is in <a href="dreamscribe_prototype.py">dreamscribe_prototype.py</a>. Below is the core pipeline function. Each function includes comments showing the exact real API call to swap in.</p>
+
+    <div class="code-header">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span class="filename">dreamscribe_prototype.py</span>
+    </div>
+    <pre class="attached"><span class="kw">def</span> <span class="fn">dream_to_comic</span>(dream_input: DreamInput, output_dir: str = <span class="str">"dreamscribe_output"</span>) -> DreamComic:
+    <span class="str">"""Full DreamScribe pipeline: DreamInput → ParsedDream → Story Beats → Comic"""</span>
+    os.makedirs(output_dir, exist_ok=<span class="kw">True</span>)
+
+    <span class="cm"># Step 2: Parse the dream with GPT-4</span>
+    parsed = <span class="fn">parse_dream</span>(dream_input)
+
+    <span class="cm"># Step 3: Build 6-beat story arc</span>
+    beats = <span class="fn">build_story_arc</span>(parsed, dream_input)
+
+    <span class="cm"># Step 4: Generate comic panels (DALL-E 3)</span>
+    panels = []
+    <span class="kw">for</span> i, beat <span class="kw">in</span> <span class="fn">enumerate</span>(beats, <span class="num-lit">1</span>):
+        image_prompt = <span class="fn">build_image_prompt</span>(beat[<span class="str">"scene_description"</span>], parsed.art_style)
+        panel = ComicPanel(
+            panel_number=i,
+            scene_description=beat[<span class="str">"scene_description"</span>],
+            dialogue=beat[<span class="str">"dialogue"</span>],
+            image_prompt=image_prompt
+        )
+        panel.image_path = <span class="fn">generate_panel_image</span>(panel, parsed.art_style, output_dir)
+        panels.append(panel)
+
+    <span class="cm"># Assemble and save the comic</span>
+    comic = DreamComic(title=<span class="str">"Dream of the Cloud City"</span>, panels=panels,
+                       mood=parsed.mood, art_style=parsed.art_style)
+    <span class="kw">return</span> comic</pre>
+
+    <br/>
+
+    <div class="code-header">
+      <div class="dot dot-red"></div>
+      <div class="dot dot-yellow"></div>
+      <div class="dot dot-green"></div>
+      <span class="filename">parse_dream() — real GPT-4 implementation</span>
+    </div>
+    <pre class="attached"><span class="cm"># Real implementation (swap mock for this when OPENAI_API_KEY is set)</span>
+<span class="kw">import</span> openai
+client = openai.OpenAI(api_key=os.environ[<span class="str">"OPENAI_API_KEY"</span>])
+
+prompt = <span class="fn">f</span><span class="str">"""
+Parse this dream into structured components. Return JSON only.
+Dream: {dream_input.raw_text}
+Weirdest part: {dream_input.weirdest_part}
+Emotional tone: {dream_input.emotional_tone}
+
+Return:
+{{
+  "characters": [...],
+  "setting": "...",
+  "key_events": [...],
+  "mood": "playful|surreal|dark|heartwarming",
+  "art_style": "..."
+}}
+"""</span>
+
+response = client.chat.completions.create(
+    model=<span class="str">"gpt-4"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}],
+    response_format={<span class="str">"type"</span>: <span class="str">"json_object"</span>}
+)
+data = json.loads(response.choices[<span class="num-lit">0</span>].message.content)
+<span class="kw">return</span> ParsedDream(**data)</pre>
+  </div>
+</section>
+
+<!-- ── 5. TROUBLESHOOTING LOG ─────────────────────────────────────────────── -->
+<section id="log">
+  <div class="container">
+    <span class="section-label">05 — Troubleshooting Log</span>
+    <h2>Challenges &amp; How I Fixed Them</h2>
+    <div class="section-line"></div>
+
+    <div class="log-entry">
+      <div class="log-status status-resolved">✓ Resolved</div>
+      <div class="log-issue">GPT-4 invented major plot elements not in the dream</div>
+      <div class="log-fix"><strong>Fix:</strong> Added explicit prompt constraints — "only use details from the user's description; mark any gap-filling with [INFERRED]." This dramatically reduced hallucinations while still allowing creative gap-filling where needed.</div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-status status-resolved">✓ Resolved</div>
+      <div class="log-issue">DALL-E 3 added text and speech bubbles into the images</div>
+      <div class="log-fix"><strong>Fix:</strong> Added the explicit instruction "No text, no speech bubbles, no captions" to every image prompt prefix. Consistency improved significantly.</div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-status status-resolved">✓ Resolved</div>
+      <div class="log-issue">Mood classifier was over-classifying everything as "surreal"</div>
+      <div class="log-fix"><strong>Fix:</strong> The keyword-based classifier was too broad. Switched to a weighted scoring approach that requires at least 2 distinct signals before assigning a mood. Also added "heartwarming" as an explicit default for dreams with no strong negative valence.</div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-status status-open">⏳ In Progress</div>
+      <div class="log-issue">Visual consistency across panels — characters look different in each panel</div>
+      <div class="log-fix"><strong>Current approach:</strong> Adding a consistent character description seed phrase to every panel prompt (e.g. "same character: short dark hair, purple jacket, 20s"). Exploring LoRA fine-tuning and IP-Adapter as longer-term solutions.</div>
+    </div>
+
+    <div class="log-entry">
+      <div class="log-status status-open">⏳ In Progress</div>
+      <div class="log-issue">Whisper struggles with groggy, mumbled speech right after waking</div>
+      <div class="log-fix"><strong>Current approach:</strong> Added a post-transcription GPT-4 cleanup pass that fixes filler words, run-on sentences, and incomplete thoughts common in half-awake speech. Testing with deliberately low-quality audio samples.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 6. INSTRUCTOR SUPPORT ─────────────────────────────────────────────── -->
+<section id="support">
+  <div class="container">
+    <span class="section-label">06 — Instructor Support</span>
+    <h2>Open Questions for the Instructor</h2>
+    <div class="section-line"></div>
+
+    <p>These are the specific areas where I'd love guidance before the final submission:</p>
+
+    <div class="q-item">
+      <div class="q-num">Question 01</div>
+      <div class="q-text">How do I maintain visual consistency across all 6 DALL-E panels?</div>
+      <div class="q-detail">LoRA / IP-Adapter seems promising but I haven't set up the workflow yet. Is there a simpler seed-based approach that works well with DALL-E 3, or should I switch to Stable Diffusion for this use case?</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-num">Question 02</div>
+      <div class="q-text">How do I prompt an LLM to build a coherent story from fragmented, nonlinear dream input without over-inventing?</div>
+      <div class="q-detail">Dreams are inherently nonlinear and vague. I'm looking for the right balance between filling narrative gaps creatively and staying true to what the user actually described.</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-num">Question 03</div>
+      <div class="q-text">What's the right UX pattern for real-time story editing mid-generation?</div>
+      <div class="q-detail">I want users to be able to redirect the story while it's generating. How should I handle partial regeneration of only the affected panels without regenerating all 6?</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-num">Question 04 — (from Prof. Safinah)</div>
+      <div class="q-text">What ML approach makes sense for longitudinal dream analysis?</div>
+      <div class="q-detail">Is topic modeling or embedding similarity the right approach for helping users spot patterns in their dreams over time? How do I handle privacy — should this analysis be local-only?</div>
+    </div>
+
+    <div class="q-item">
+      <div class="q-num">Question 05 — (from Prof. Maria)</div>
+      <div class="q-text">How do I handle nightmares and dark dream content safely?</div>
+      <div class="q-detail">Some users will have dark or distressing dreams. How do I balance depicting those faithfully with ensuring the content moderation layer doesn't strip out the emotional truth of the dream?</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <p><strong>DreamScribe</strong> — Project Prototype Documentation</p>
+    <p>William Yang · April 8, 2026 · AI &amp; Design Studio</p>
+    <p style="margin-top:1rem;font-size:0.75rem;">
+      Built with Python, GPT-4, DALL-E 3, Whisper, and Claude AI.<br/>
+      Source code: <a href="dreamscribe_prototype.py">dreamscribe_prototype.py</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>
